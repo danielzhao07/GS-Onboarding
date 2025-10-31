@@ -2,7 +2,8 @@ from collections.abc import Callable
 from typing import Any
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-
+from loguru import logger
+from time import perf_counter
 
 class LoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(
@@ -18,5 +19,15 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         :return: Response from endpoint
         """
         # TODO:(Member) Finish implementing this method
-        response = await call_next(request)
+        start_time = perf_counter()      
+        logger.info(f"{request.method} {request.url.path}")
+
+        response: Response = await call_next(request)
+
+        process_time = (perf_counter() - start_time) * 1000
+        logger.info(
+            f"{request.method} {request.url.path} "
+            f"{response.status_code} in {process_time:.2f}ms"
+        )
+
         return response
