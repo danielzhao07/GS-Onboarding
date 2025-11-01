@@ -51,7 +51,7 @@ def delete_command(id: int, db: Session = Depends(get_db)):
     cmd = db.get(Command, id)
     
     if cmd is None:
-        raise HTTPException(status_code = 404)
+        raise HTTPException(status_code = 404, detail = f"Command with id {id} not found")
     
     db.delete(cmd)
     db.commit()

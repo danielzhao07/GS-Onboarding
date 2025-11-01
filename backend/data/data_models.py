@@ -40,10 +40,10 @@ class MainCommand(BaseSQLModel, table=True):
             return self
         # One is None, the other is not
         elif p is None or f is None:
-            raise ValueError()
+            raise ValueError(f"Params and format must both be None")
         elif p.count(",") == f.count(","):
             return self
-        raise ValueError()
+        raise ValueError(f"Params and format must have the same number of comma seperated values")
 
 class Command(BaseSQLModel, table=True):
     """
