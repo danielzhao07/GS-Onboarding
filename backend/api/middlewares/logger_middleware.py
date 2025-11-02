@@ -2,6 +2,7 @@ from collections.abc import Callable
 from typing import Any
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.exceptions import HTTPException
 from loguru import logger
 from time import perf_counter
 
@@ -22,12 +23,21 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         start_time = perf_counter()      
         logger.info(f"{request.method} {request.url.path}")
 
-        response: Response = await call_next(request)
+        try:
+            response: Response = await call_next(request)
 
-        process_time = (perf_counter() - start_time) * 1000
-        logger.info(
-            f"{request.method} {request.url.path} "
-            f"{response.status_code} in {process_time:.2f}ms"
-        )
+            process_time = (perf_counter() - start_time) * 1000
+            logger.info(
+                f"{request.method} {request.url.path} "
+                f"{response.status_code} in {process_time:.2f}ms"
+            )
 
-        return response
+            return response
+        except Exception as e:
+            # Log unexpected errors
+            process_time = (perf_counter() - start_time) * 1000
+            logger.error(
+                f"{request.method} {request.url.path} "
+                f"ERROR in {process_time:.2f}ms: {str(e)}"
+            )
+            raise
